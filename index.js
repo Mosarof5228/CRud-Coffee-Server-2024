@@ -1,6 +1,6 @@
 const express=require('express')
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors=require('cors')
 const app=express()
 const port=process.env.PORT || 5000
@@ -25,20 +25,74 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
    
-const CoffeeCollection=client.db("Coffee_DB").collection('coffees');
+    const CoffeeCollection = client.db("Coffee_DB").collection('coffees');
     
-app.post('/coffees',async(req,res)=>{
+    app.get('/coffees',async(req,res)=>{
+      const cursor=CoffeeCollection.find();
+      const result=await cursor.toArray();
+      res.send(result);
+    })
+    
+    app.get('/coffees/:id', async (req, res) => {
+      const id = req.params.id;
+      const query={_id:new ObjectId(id)}
+      const result = await CoffeeCollection.findOne(query);
+      res.send(result);
+    })
+    
+  app.post('/coffees',async(req,res)=>{
     const newCoffees=req.body;
     const result=await CoffeeCollection.insertOne(newCoffees);
     res.send(result);
 
-})
+  })
+  
+    app.put('/coffees/id', async (req, res) => {
+      const id = req.params.id;
+      const coffee = req.body;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true }
+   
+      const result = await CoffeeCollection.updateOne(filter, updateCoffee, options)
+      res.send(result);
 
-app.get('/coffees',async(req,res)=>{
-    const cursor=CoffeeCollection.find();
-    const result=await cursor.toArray();
-    res.send(result);
-})
+    })
+    
+
+
+
+    app.put('/coffees/:id', async (req, res) => {
+      const id = req.params.id;
+      const coffee = req.body;
+      const filter={_id:new ObjectId(id)}
+      const options = { upsert: true };
+      const updateCoffee = {
+        $set: {
+          name: coffee.name,
+          color: coffee.color,
+          brand: coffee.brand,
+          madein: coffee.madein,
+          photo: coffee.photo,
+          taste: coffee.tase,
+          
+        }
+      }
+      const result = await CoffeeCollection.updateOne(filter, updateCoffee, options)
+      res.send(result);
+
+    })
+    
+    app.delete('/coffees/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await CoffeeCollection.deleteOne(query)
+      res.send(result);
+
+  })
+    
+  
+
+
 
 
 
