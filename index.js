@@ -26,6 +26,8 @@ async function run() {
     await client.connect();
    
     const CoffeeCollection = client.db("Coffee_DB").collection('coffees');
+    const UserCollection=client.db('Coffee_DB').collection('users')
+    
     
     app.get('/coffees',async(req,res)=>{
       const cursor=CoffeeCollection.find();
@@ -88,6 +90,23 @@ async function run() {
       const result = await CoffeeCollection.deleteOne(query)
       res.send(result);
 
+  })
+
+  // User Related API Start Here
+
+
+app.get('/users',async(req,res)=>{
+const cursor=UserCollection.find();
+const result=await cursor.toArray();
+res.send(result);
+})
+
+
+  app.post('/users',async(req,res)=>{
+    const newUsers=req.body;
+    console.log(newUsers);
+    const result=await UserCollection.insertOne(newUsers);
+    res.send(result);
   })
     
   
