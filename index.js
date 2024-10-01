@@ -108,6 +108,25 @@ res.send(result);
     const result=await UserCollection.insertOne(newUsers);
     res.send(result);
   })
+
+  app.put('/users',async(req,res)=>{
+    const user=req.body;
+    const filter={email:user.email};
+    const updateUser={
+      $set:{
+        lastLoggedAt:user.lastLoggedAt
+      }
+    }
+    const result=await UserCollection.updateOne(filter,updateUser)
+    res.send(result);
+  })
+
+  app.delete('/users/:id',async(req,res)=>{
+    const id=req.params.id;
+    const query={_id:new ObjectId(id)};
+    const result=await UserCollection.deleteOne(query);
+    res.send(result);
+  })
     
   
 
